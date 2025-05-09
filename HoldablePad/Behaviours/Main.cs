@@ -151,10 +151,10 @@ namespace HoldablePad.Behaviours
             float currentTime = Time.unscaledTime;
             foreach (FileInfo holdableFile in holdableFiles)
             {
-                var holdableBundle = await AssetUtils.LoadFromFile(Path.Combine(holdablePath, holdableFile.Name));
+                var holdableBundle = await AssetUtils1.LoadFromFile(Path.Combine(holdablePath, holdableFile.Name));
                 if (holdableBundle == null) continue;
 
-                var holdableAsset = await AssetUtils.LoadAsset<GameObject>(holdableBundle, "holdABLE");
+                var holdableAsset = await AssetUtils1.LoadAsset<GameObject>(holdableBundle, "holdABLE");
                 holdableBundle.Unload(false);
 
                 holdableAsset.name = holdableFile.Name;
@@ -234,13 +234,22 @@ namespace HoldablePad.Behaviours
                 HoldablesToRemove.Clear();
             }
 
-            MainResourceBundle = await AssetUtils.LoadFromStream(Constants.Asset_Resource);
-            Open = await AssetUtils.LoadAsset<AudioClip>(MainResourceBundle, "HP_Open");
-            Swap = await AssetUtils.LoadAsset<AudioClip>(MainResourceBundle, "HP_Swap");
-            Equip = await AssetUtils.LoadAsset<AudioClip>(MainResourceBundle, "HP_Equip");
+            MainResourceBundle = await AssetUtils1.LoadFromStream("HoldablePad.Resources.hp_builtin");
+            if (MainResourceBundle == null)
+            {
+                Debug.LogError("MainResourceBundle is null. Failed to load the AssetBundle.");
+                return;
+            }
+            Open = await AssetUtils1.LoadAsset<AudioClip>(MainResourceBundle, "HP_Open");
+            Swap = await AssetUtils1.LoadAsset<AudioClip>(MainResourceBundle, "HP_Swap");
+            Equip = await AssetUtils1.LoadAsset<AudioClip>(MainResourceBundle, "HP_Equip");
 
-            HoldablePadHandheld = Instantiate(await AssetUtils.LoadAsset<GameObject>(MainResourceBundle, "HoldablePad_Parent"));
-            ScoreboardIcon = await AssetUtils.LoadAsset<Sprite>(MainResourceBundle, "HPLowIcon");
+            Open = await AssetUtils1.LoadAsset<AudioClip>(MainResourceBundle, "HP_Open");
+            Swap = await AssetUtils1.LoadAsset<AudioClip>(MainResourceBundle, "HP_Swap");
+            Equip = await AssetUtils1.LoadAsset<AudioClip>(MainResourceBundle, "HP_Equip");
+
+            HoldablePadHandheld = Instantiate(await AssetUtils1.LoadAsset<GameObject>(MainResourceBundle, "HoldablePad_Parent"));
+            ScoreboardIcon = await AssetUtils1.LoadAsset<Sprite>(MainResourceBundle, "HPLowIcon");
             PadSource = HoldablePadHandheld.GetComponent<AudioSource>();
             SetPadTheme(HP_Config.CurrentTheme.Value);
 
