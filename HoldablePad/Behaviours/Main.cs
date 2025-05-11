@@ -1012,11 +1012,11 @@ namespace HoldablePad.Behaviours
         {
             switch (objectName)
             {
-                case "Cube (3)":
+                /*case "Cube (3)":
                     SetPage(ScreenModes.ConfigView);
                     PadSource.PlayOneShot(Open, Constants.ButtonVolume);
                     Static.GlobalBtnCooldownTime = Time.unscaledTime;
-                    return;
+                    return;*/
                 case "Cube (4)":
                     SetPage(ScreenModes.InfoView);
                     PadSource.PlayOneShot(Open, Constants.ButtonVolume);
