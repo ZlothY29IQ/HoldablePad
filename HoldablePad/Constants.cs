@@ -4,9 +4,9 @@
     {
         public const string
             GUID = "dev.zlothfix.HoldablePad",
-            //zloth the builder, she can fix it!
+            //ZlothY is sigma trust
             Name = "HoldablePad",
-            Version = "1.5.0";
+            Version = "1.5.2";
 
         public const float PageLerp = 28;
         public const int PageDisplay = 85;

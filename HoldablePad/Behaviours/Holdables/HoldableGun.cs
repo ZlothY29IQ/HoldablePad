@@ -36,7 +36,8 @@ namespace HoldablePad.Behaviours.Holdables
             ReferenceGun.LoopAudio = bool.Parse(handheldInfo[2]);
 
             ReferenceGun.ProjectileSource.loop = ReferenceGun.LoopAudio;
-            if (ReferenceGun.ProjectileSource.spatialBlend == 0) ReferenceGun.ProjectileSource.volume = Mathf.Clamp(ReferenceGun.ProjectileSource.volume, 0.0f, 0.1f);
+            if (ReferenceGun.ProjectileSource.spatialBlend == 0)
+                ReferenceGun.ProjectileSource.volume = Mathf.Clamp(ReferenceGun.ProjectileSource.volume, 0.0f, 0.1f);
 
             if (handheldInfo.ElementAtOrDefault(3) != null && bool.Parse(handheldInfo[3]))
             {
@@ -73,12 +74,13 @@ namespace HoldablePad.Behaviours.Holdables
             }
         }
 
-        public void ProjectProjectile() // To whoever is reading this, please let me know on a scale of 1-10 how good I am at naming my methods
+        public void ProjectProjectile() // To whoever is reading this, please let me know on a scale of 1-10 how good I am at naming my methods  //ZlothY - very good well done :3
         {
             if (!ReferenceGun.LoopAudio)
             {
                 ReferenceGun.ProjectileSource.Play();
-                if (ReferenceGun.VibrationModule) GorillaTagger.Instance.StartVibration(IsLeft, ReferenceGun.VibrationAmp, ReferenceGun.VibrationDur);
+                if (ReferenceGun.VibrationModule)
+                    GorillaTagger.Instance.StartVibration(IsLeft, ReferenceGun.VibrationAmp, ReferenceGun.VibrationDur);
             }
 
             var ProjectedBullet = Instantiate(ReferenceGun.ProjectileObject.gameObject);
@@ -91,12 +93,14 @@ namespace HoldablePad.Behaviours.Holdables
             TempBulletTransform.transform.localScale = ReferenceGun.ProjectileObject.localScale;
 
             foreach (var component in TempBulletTransform.GetComponentsInChildren<ParticleSystem>()) component.Play();
-            foreach (var component in TempBulletTransform.GetComponentsInChildren<TrailRenderer>()) component.enabled = true;
+            foreach (var component in TempBulletTransform.GetComponentsInChildren<TrailRenderer>())
+                component.enabled = true;
             foreach (var component in TempBulletTransform.GetComponentsInChildren<Light>()) component.enabled = true;
 
             var localProjectile = ProjectedBullet.AddComponent<HoldableProjectile>();
             localProjectile.ReferenceHoldable = this;
-            localProjectile.targetVelocity = (PlayerUtils.GetPalm(IsLeft).up - Vector3.up * 0.18f) * ReferenceGun.ProjectSpeed * Constants.ProjectileMultiplier;
+            localProjectile.targetVelocity = (PlayerUtils.GetPalm(IsLeft).up - Vector3.up * 0.18f) *
+                                             ReferenceGun.ProjectSpeed * Constants.ProjectileMultiplier;
         }
     }
 }

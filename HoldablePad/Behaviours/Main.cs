@@ -29,12 +29,14 @@ namespace HoldablePad.Behaviours
         /// If the pad can be opened
         /// </summary>
         private bool Pad_CanOpen = true;
+
         private bool Pad_ThumbPress;
 
         /// <summary>
         /// The index for the current HoldableList we're working with
         /// </summary>
         private int CurrentHoldableListItem;
+
         private readonly List<List> HoldableList = new List<List>();
 
         /// <summary>
@@ -137,7 +139,8 @@ namespace HoldablePad.Behaviours
             LeftHandDevice = InputDevices.GetDeviceAtXRNode(XRNode.LeftHand);
             RightHandDevice = InputDevices.GetDeviceAtXRNode(XRNode.RightHand);
 
-            string holdablePath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Holdables");
+            string holdablePath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location),
+                "Holdables");
             if (!Directory.Exists(holdablePath))
                 await WriteHoldables(true);
 
@@ -175,12 +178,15 @@ namespace HoldablePad.Behaviours
                 if (holdableColliders.Length > 0) holdableColliders.ToList().ForEach(c => c.enabled = false);
 
                 // Remove directional lights
-                if (holdableAsset.GetComponentsInChildren<Light>().Where(a => a.type == LightType.Directional).ToList() is var lightList && lightList.Count > 0)
+                if (holdableAsset.GetComponentsInChildren<Light>().Where(a => a.type == LightType.Directional)
+                        .ToList() is var lightList && lightList.Count > 0)
                     lightList.ForEach(a => a.enabled = false);
 
-                HP_Log.Log(string.Concat("Loaded holdable ", localHoldable.GetHoldableProp(0), " by ", localHoldable.GetHoldableProp(1)));
+                HP_Log.Log(string.Concat("Loaded holdable ", localHoldable.GetHoldableProp(0), " by ",
+                    localHoldable.GetHoldableProp(1)));
                 await Task.Yield();
             }
+
             int currentHoldableLength = InitalizedHoldables.Count;
             List<Holdable> HoldablesToRemove = new List<Holdable>();
 
@@ -189,13 +195,15 @@ namespace HoldablePad.Behaviours
             {
                 try
                 {
-                    bool isLeftHand = bool.Parse(holdable.GetHoldableProp(Holdable.HoldablePropType.IsLeftHand).ToString());
+                    bool isLeftHand =
+                        bool.Parse(holdable.GetHoldableProp(Holdable.HoldablePropType.IsLeftHand).ToString());
                     string holdableName = holdable.BasePath;
 
                     var localPlayer = GorillaTagger.Instance.offlineVRRig;
 
                     var clonedHoldable = Instantiate(holdable.HoldableObject);
-                    foreach (var component in clonedHoldable.GetComponentsInChildren<AudioSource>().Where(a => a.spatialBlend != 1).ToArray())
+                    foreach (var component in clonedHoldable.GetComponentsInChildren<AudioSource>()
+                                 .Where(a => a.spatialBlend != 1).ToArray())
                     {
                         float maxVolume = 0.06f;
                         if (component.name == "UsedBulletSoundEffect") maxVolume = 0.1f;
@@ -215,11 +223,13 @@ namespace HoldablePad.Behaviours
                         gunHoldable.ReferenceHoldable = holdable;
                         gunHoldable.Initalize();
                     }
+
                     holdable.InstantiatedObject = clonedHoldable;
                 }
                 catch (Exception e)
                 {
-                    HP_Log.LogError("Exception (" + e.GetType().Name + ") while trying to create handheld object for " + holdable.GetHoldableProp(Holdable.HoldablePropType.Name));
+                    HP_Log.LogError("Exception (" + e.GetType().Name + ") while trying to create handheld object for " +
+                                    holdable.GetHoldableProp(Holdable.HoldablePropType.Name));
                     HoldablesToRemove.Add(holdable);
                 }
             }
@@ -240,15 +250,17 @@ namespace HoldablePad.Behaviours
                 Debug.LogError("MainResourceBundle is null. Failed to load the AssetBundle.");
                 return;
             }
-            Open = await AssetUtils1.LoadAsset<AudioClip>(MainResourceBundle, "HP_Open");
-            Swap = await AssetUtils1.LoadAsset<AudioClip>(MainResourceBundle, "HP_Swap");
-            Equip = await AssetUtils1.LoadAsset<AudioClip>(MainResourceBundle, "HP_Equip");
 
             Open = await AssetUtils1.LoadAsset<AudioClip>(MainResourceBundle, "HP_Open");
             Swap = await AssetUtils1.LoadAsset<AudioClip>(MainResourceBundle, "HP_Swap");
             Equip = await AssetUtils1.LoadAsset<AudioClip>(MainResourceBundle, "HP_Equip");
 
-            HoldablePadHandheld = Instantiate(await AssetUtils1.LoadAsset<GameObject>(MainResourceBundle, "HoldablePad_Parent"));
+            Open = await AssetUtils1.LoadAsset<AudioClip>(MainResourceBundle, "HP_Open");
+            Swap = await AssetUtils1.LoadAsset<AudioClip>(MainResourceBundle, "HP_Swap");
+            Equip = await AssetUtils1.LoadAsset<AudioClip>(MainResourceBundle, "HP_Equip");
+
+            HoldablePadHandheld =
+                Instantiate(await AssetUtils1.LoadAsset<GameObject>(MainResourceBundle, "HoldablePad_Parent"));
             ScoreboardIcon = await AssetUtils1.LoadAsset<Sprite>(MainResourceBundle, "HPLowIcon");
             PadSource = HoldablePadHandheld.GetComponent<AudioSource>();
             SetPadTheme(HP_Config.CurrentTheme.Value);
@@ -258,7 +270,8 @@ namespace HoldablePad.Behaviours
 
             foreach (Holdable holdable in InitalizedHoldables)
             {
-                var newPageObject = Instantiate(holdableTransform.Find(HoldableList[0].BaseObjectPath).gameObject, holdableTransform.Find(HoldableList[0].BaseObjectPath).parent);
+                var newPageObject = Instantiate(holdableTransform.Find(HoldableList[0].BaseObjectPath).gameObject,
+                    holdableTransform.Find(HoldableList[0].BaseObjectPath).parent);
                 newPageObject.name = holdable.GetHoldableProp(Holdable.HoldablePropType.Name).ToString();
 
                 var newPage = new Page
@@ -281,31 +294,45 @@ namespace HoldablePad.Behaviours
                     var holdablePreviewObject = Instantiate(holdable.HoldableObject);
                     holdable.PreviewObject = holdablePreviewObject;
 
-                    bool isLeftHand = bool.Parse(holdable.GetHoldableProp(Holdable.HoldablePropType.IsLeftHand).ToString());
-                    Transform handTransform = isLeftHand ? newPage.PreviewBase.Find("LeftExporter") : newPage.PreviewBase.Find("RightExporter");
+                    bool isLeftHand =
+                        bool.Parse(holdable.GetHoldableProp(Holdable.HoldablePropType.IsLeftHand).ToString());
+                    Transform handTransform = isLeftHand
+                        ? newPage.PreviewBase.Find("LeftExporter")
+                        : newPage.PreviewBase.Find("RightExporter");
                     holdablePreviewObject.transform.SetParent(handTransform, false);
 
-                    var componentTypes = new List<Type>() { typeof(ParticleSystem), typeof(TrailRenderer), typeof(AudioSource), typeof(Light), typeof(VideoPlayer), typeof(LODGroup), typeof(AudioListener) };
-                    var componentsList = holdablePreviewObject.GetComponentsInChildren(typeof(Component)).Where(a => componentTypes.Contains(a.GetType()));
+                    var componentTypes = new List<Type>()
+                    {
+                        typeof(ParticleSystem), typeof(TrailRenderer), typeof(AudioSource), typeof(Light),
+                        typeof(VideoPlayer), typeof(LODGroup), typeof(AudioListener)
+                    };
+                    var componentsList = holdablePreviewObject.GetComponentsInChildren(typeof(Component))
+                        .Where(a => componentTypes.Contains(a.GetType()));
                     foreach (var component in componentsList) Destroy(component);
 
                     newPage.Header.text = holdable.GetHoldableProp(Holdable.HoldablePropType.Name).ToString();
-                    newPage.Author.text = string.Concat("Holdable by ", holdable.GetHoldableProp(Holdable.HoldablePropType.Author).ToString());
-                    newPage.Description.text = holdable.GetHoldableProp(Holdable.HoldablePropType.Description).ToString();
+                    newPage.Author.text = string.Concat("Holdable by ",
+                        holdable.GetHoldableProp(Holdable.HoldablePropType.Author).ToString());
+                    newPage.Description.text =
+                        holdable.GetHoldableProp(Holdable.HoldablePropType.Description).ToString();
 
                     bool isLeft = bool.Parse(holdable.GetHoldableProp(Holdable.HoldablePropType.IsLeftHand).ToString());
-                    holdableTransform.Find("UI/ButtonTextMiddle").GetComponent<Text>().text = HoldableUtils.IsEquipped(holdable) ? "Unequip" : $"Equip ({(isLeft ? "Left" : "Right")})";
+                    holdableTransform.Find("UI/ButtonTextMiddle").GetComponent<Text>().text =
+                        HoldableUtils.IsEquipped(holdable) ? "Unequip" : $"Equip ({(isLeft ? "Left" : "Right")})";
 
                     object colourProp = holdable.GetHoldableProp(Holdable.HoldablePropType.UtilizeCustomColour);
                     bool customColour = colourProp != null && bool.Parse(colourProp.ToString());
 
                     bool isGun = holdable.InstantiatedObject.GetComponentInChildren<HoldableGun>() != null;
-                    bool gunHaptic = isGun && holdable.InstantiatedObject.GetComponentInChildren<HoldableGun>().ReferenceGun.VibrationModule;
+                    bool gunHaptic = isGun && holdable.InstantiatedObject.GetComponentInChildren<HoldableGun>()
+                        .ReferenceGun.VibrationModule;
 
                     var baseObject = holdable.HoldableObject;
 
                     var audioSources = baseObject.GetComponentsInChildren<AudioSource>();
-                    audioSources = audioSources.Length > 0 ? audioSources.Where(a => a.name != "UsedBulletSoundEffect").ToArray() : audioSources;
+                    audioSources = audioSources.Length > 0
+                        ? audioSources.Where(a => a.name != "UsedBulletSoundEffect").ToArray()
+                        : audioSources;
 
                     var lights = baseObject.GetComponentsInChildren<Light>();
                     lights = lights.Length > 0 ? lights.Where(a => a.type != LightType.Directional).ToArray() : lights;
@@ -322,12 +349,15 @@ namespace HoldablePad.Behaviours
 
                     if (customColour)
                     {
-                        var holdableRenderers = holdable.InstantiatedObject.GetComponentsInChildren<MeshRenderer>().ToList();
-                        if (holdableRenderers.Count > 0 && holdableRenderers.Where(c => c.materials.Length > 0).ToList().Count > 0)
+                        var holdableRenderers =
+                            holdable.InstantiatedObject.GetComponentsInChildren<MeshRenderer>().ToList();
+                        if (holdableRenderers.Count > 0 &&
+                            holdableRenderers.Where(c => c.materials.Length > 0).ToList().Count > 0)
                         {
                             var holdableMaterials = new List<Material>();
                             holdableRenderers.ForEach(a => a.materials.ToList().ForEach(b => holdableMaterials.Add(b)));
-                            holdableMaterials = holdableMaterials.Where(a => a.HasProperty("_Color") || a.HasProperty("_Glow")).ToList();
+                            holdableMaterials = holdableMaterials
+                                .Where(a => a.HasProperty("_Color") || a.HasProperty("_Glow")).ToList();
                             holdableMaterials.ForEach(a => CC_Materials.Add(a));
                         }
                     }
@@ -343,19 +373,26 @@ namespace HoldablePad.Behaviours
                         newPage.PreviewBase.localScale = Vector3.one * 33.27129f;
                     }
 
-                    var currentHand = isLeft ? newPage.PreviewBase.Find("PreviewObject/metarig/hand_L") : newPage.PreviewBase.Find("PreviewObject/metarig/hand_R");
-                    var hiddenHand = !isLeft ? newPage.PreviewBase.Find("PreviewObject/metarig/hand_L") : newPage.PreviewBase.Find("PreviewObject/metarig/hand_R");
-                    currentHand.transform.localScale = Vector3.one; hiddenHand.transform.localScale = Vector3.zero;
+                    var currentHand = isLeft
+                        ? newPage.PreviewBase.Find("PreviewObject/metarig/hand_L")
+                        : newPage.PreviewBase.Find("PreviewObject/metarig/hand_R");
+                    var hiddenHand = !isLeft
+                        ? newPage.PreviewBase.Find("PreviewObject/metarig/hand_L")
+                        : newPage.PreviewBase.Find("PreviewObject/metarig/hand_R");
+                    currentHand.transform.localScale = Vector3.one;
+                    hiddenHand.transform.localScale = Vector3.zero;
                 }
                 catch (Exception e)
                 {
-                    HP_Log.LogError("Exception (" + e.GetType().Name + ") while trying to create preview object for " + holdable.GetHoldableProp(Holdable.HoldablePropType.Name));
+                    HP_Log.LogError("Exception (" + e.GetType().Name + ") while trying to create preview object for " +
+                                    holdable.GetHoldableProp(Holdable.HoldablePropType.Name));
                     Destroy(newPageObject);
 
                     HoldableList[0].MenuPages.Remove(newPage);
                     HoldablesToRemove.Add(holdable);
                 }
             }
+
             // Do this after we've setup our favourites buttons
             SetPadHand(HP_Config.CurrentHand.Value == HP_Config.HandPosition.LeftHand);
             SetFavoruiteButtonSide(HP_Config.CurrentHand.Value == HP_Config.HandPosition.LeftHand);
@@ -373,7 +410,8 @@ namespace HoldablePad.Behaviours
             // Favourites, 10:04 PM 7/3/2023
             foreach (Holdable holdable in InitalizedHoldables)
             {
-                var newPageObject = Instantiate(holdableTransform.Find(HoldableList[1].BaseObjectPath).gameObject, holdableTransform.Find(HoldableList[1].BaseObjectPath).parent);
+                var newPageObject = Instantiate(holdableTransform.Find(HoldableList[1].BaseObjectPath).gameObject,
+                    holdableTransform.Find(HoldableList[1].BaseObjectPath).parent);
                 newPageObject.name = holdable.GetHoldableProp(Holdable.HoldablePropType.Name).ToString();
 
                 var newPage = new Page
@@ -393,31 +431,45 @@ namespace HoldablePad.Behaviours
                     var holdablePreviewObject = Instantiate(holdable.HoldableObject);
                     holdable.PreviewObject = holdablePreviewObject;
 
-                    bool isLeftHand = bool.Parse(holdable.GetHoldableProp(Holdable.HoldablePropType.IsLeftHand).ToString());
-                    Transform handTransform = isLeftHand ? newPage.PreviewBase.Find("LeftExporter") : newPage.PreviewBase.Find("RightExporter");
+                    bool isLeftHand =
+                        bool.Parse(holdable.GetHoldableProp(Holdable.HoldablePropType.IsLeftHand).ToString());
+                    Transform handTransform = isLeftHand
+                        ? newPage.PreviewBase.Find("LeftExporter")
+                        : newPage.PreviewBase.Find("RightExporter");
                     holdablePreviewObject.transform.SetParent(handTransform, false);
 
-                    var componentTypes = new List<Type>() { typeof(ParticleSystem), typeof(TrailRenderer), typeof(AudioSource), typeof(Light), typeof(VideoPlayer), typeof(LODGroup), typeof(AudioListener) };
-                    var componentsList = holdablePreviewObject.GetComponentsInChildren(typeof(Component)).Where(a => componentTypes.Contains(a.GetType()));
+                    var componentTypes = new List<Type>()
+                    {
+                        typeof(ParticleSystem), typeof(TrailRenderer), typeof(AudioSource), typeof(Light),
+                        typeof(VideoPlayer), typeof(LODGroup), typeof(AudioListener)
+                    };
+                    var componentsList = holdablePreviewObject.GetComponentsInChildren(typeof(Component))
+                        .Where(a => componentTypes.Contains(a.GetType()));
                     foreach (var component in componentsList) Destroy(component);
 
                     newPage.Header.text = holdable.GetHoldableProp(Holdable.HoldablePropType.Name).ToString();
-                    newPage.Author.text = string.Concat("Holdable by ", holdable.GetHoldableProp(Holdable.HoldablePropType.Author).ToString());
-                    newPage.Description.text = holdable.GetHoldableProp(Holdable.HoldablePropType.Description).ToString();
+                    newPage.Author.text = string.Concat("Holdable by ",
+                        holdable.GetHoldableProp(Holdable.HoldablePropType.Author).ToString());
+                    newPage.Description.text =
+                        holdable.GetHoldableProp(Holdable.HoldablePropType.Description).ToString();
 
                     bool isLeft = bool.Parse(holdable.GetHoldableProp(Holdable.HoldablePropType.IsLeftHand).ToString());
-                    holdableTransform.Find("UI/ButtonTextMiddle").GetComponent<Text>().text = HoldableUtils.IsEquipped(holdable) ? "Unequip" : $"Equip ({(isLeft ? "Left" : "Right")})";
+                    holdableTransform.Find("UI/ButtonTextMiddle").GetComponent<Text>().text =
+                        HoldableUtils.IsEquipped(holdable) ? "Unequip" : $"Equip ({(isLeft ? "Left" : "Right")})";
 
                     object colourProp = holdable.GetHoldableProp(Holdable.HoldablePropType.UtilizeCustomColour);
                     bool customColour = colourProp != null && bool.Parse(colourProp.ToString());
 
                     bool isGun = holdable.InstantiatedObject.GetComponentInChildren<HoldableGun>() != null;
-                    bool gunHaptic = isGun && holdable.InstantiatedObject.GetComponentInChildren<HoldableGun>().ReferenceGun.VibrationModule;
+                    bool gunHaptic = isGun && holdable.InstantiatedObject.GetComponentInChildren<HoldableGun>()
+                        .ReferenceGun.VibrationModule;
 
                     var baseObject = holdable.HoldableObject;
 
                     var audioSources = baseObject.GetComponentsInChildren<AudioSource>();
-                    audioSources = audioSources.Length > 0 ? audioSources.Where(a => a.name != "UsedBulletSoundEffect").ToArray() : audioSources;
+                    audioSources = audioSources.Length > 0
+                        ? audioSources.Where(a => a.name != "UsedBulletSoundEffect").ToArray()
+                        : audioSources;
 
                     var lights = baseObject.GetComponentsInChildren<Light>();
                     lights = lights.Length > 0 ? lights.Where(a => a.type != LightType.Directional).ToArray() : lights;
@@ -443,19 +495,27 @@ namespace HoldablePad.Behaviours
                         newPage.PreviewBase.localScale = Vector3.one * 33.27129f;
                     }
 
-                    var currentHand = isLeft ? newPage.PreviewBase.Find("PreviewObject/metarig/hand_L") : newPage.PreviewBase.Find("PreviewObject/metarig/hand_R");
-                    var hiddenHand = !isLeft ? newPage.PreviewBase.Find("PreviewObject/metarig/hand_L") : newPage.PreviewBase.Find("PreviewObject/metarig/hand_R");
-                    currentHand.transform.localScale = Vector3.one; hiddenHand.transform.localScale = Vector3.zero;
+                    var currentHand = isLeft
+                        ? newPage.PreviewBase.Find("PreviewObject/metarig/hand_L")
+                        : newPage.PreviewBase.Find("PreviewObject/metarig/hand_R");
+                    var hiddenHand = !isLeft
+                        ? newPage.PreviewBase.Find("PreviewObject/metarig/hand_L")
+                        : newPage.PreviewBase.Find("PreviewObject/metarig/hand_R");
+                    currentHand.transform.localScale = Vector3.one;
+                    hiddenHand.transform.localScale = Vector3.zero;
                 }
                 catch (Exception e)
                 {
-                    HP_Log.LogError("Exception (" + e.GetType().Name + ") while trying to create favourite object for " + holdable.GetHoldableProp(Holdable.HoldablePropType.Name));
+                    HP_Log.LogError("Exception (" + e.GetType().Name +
+                                    ") while trying to create favourite object for " +
+                                    holdable.GetHoldableProp(Holdable.HoldablePropType.Name));
                     Destroy(newPageObject);
 
                     HoldableList[1].MenuPages.Remove(newPage);
                     HoldablesToRemove.Add(holdable);
                 }
             }
+
             HoldableList[1].IsFiltered = true;
 
             if (HoldablesToRemove.Count > 0)
@@ -486,7 +546,9 @@ namespace HoldablePad.Behaviours
                 var configSection = ConfigPage.Object.GetChild(i);
                 if (!configSection.name.StartsWith("HP_Config")) continue;
 
-                Button.ButtonPage currentPage = configSection.name == "ConfigHeldHand" ? Button.ButtonPage.ConfigHand : configSection.name == "ConfigHandSwap" ? Button.ButtonPage.ConfigSwap : Button.ButtonPage.ConfigTheme;
+                Button.ButtonPage currentPage = configSection.name == "ConfigHeldHand" ? Button.ButtonPage.ConfigHand :
+                    configSection.name == "ConfigHandSwap" ? Button.ButtonPage.ConfigSwap :
+                    Button.ButtonPage.ConfigTheme;
                 ConfigPage.configSections.Add(configSection);
 
                 var buttonObjects = configSection.GetComponentsInChildren<BoxCollider>(true);
@@ -504,6 +566,7 @@ namespace HoldablePad.Behaviours
                 if (button.gameObject.GetComponent<Button>() != null) continue;
                 button.gameObject.AddComponent<Button>();
             }
+
             HoldablePadHandheld.SetActive(false);
 
             ConfigPage.Object.localScale = Vector3.zero;
@@ -524,11 +587,15 @@ namespace HoldablePad.Behaviours
                     else
                     {
                         bool isNextPage = i == (listItem.CurrentIndex + 1) % listItem.MenuPages.Count;
-                        bool isPrevPage = i == (listItem.CurrentIndex <= 0 ? listItem.MenuPages.Count - 1 : listItem.CurrentIndex - 1);
-                        Vector3 localPosition = isPrevPage ? new Vector3(-43.5f, 17.1f, 0f) : isNextPage ? new Vector3(43.5f, 17.1f, 0f) : new Vector3(0f, 17.1f, 0f);
+                        bool isPrevPage = i == (listItem.CurrentIndex <= 0
+                            ? listItem.MenuPages.Count - 1
+                            : listItem.CurrentIndex - 1);
+                        Vector3 localPosition = isPrevPage ? new Vector3(-43.5f, 17.1f, 0f) :
+                            isNextPage ? new Vector3(43.5f, 17.1f, 0f) : new Vector3(0f, 17.1f, 0f);
                         menuPage.Object.localPosition = localPosition;
                         menuPage.Object.localScale = Vector3.zero;
                     }
+
                     menuPage.Object.gameObject.SetActive(false);
                 }
             }
@@ -536,7 +603,8 @@ namespace HoldablePad.Behaviours
             var previousLeftHoldable = HP_Config.CurrentHoldableLeft.Value;
             if (InitalizedHoldablesDict.TryGetValue(previousLeftHoldable, out Holdable tempLeftHoldable))
             {
-                bool isLeftPrevious = bool.Parse(tempLeftHoldable.GetHoldableProp(Holdable.HoldablePropType.IsLeftHand).ToString());
+                bool isLeftPrevious =
+                    bool.Parse(tempLeftHoldable.GetHoldableProp(Holdable.HoldablePropType.IsLeftHand).ToString());
                 if (isLeftPrevious)
                 {
                     HoldItem(tempLeftHoldable);
@@ -547,7 +615,8 @@ namespace HoldablePad.Behaviours
             var previousRightHoldable = HP_Config.CurrentHoldableRight.Value;
             if (InitalizedHoldablesDict.TryGetValue(previousRightHoldable, out Holdable tempRightHoldable))
             {
-                bool isRightPrevious = !bool.Parse(tempRightHoldable.GetHoldableProp(Holdable.HoldablePropType.IsLeftHand).ToString());
+                bool isRightPrevious =
+                    !bool.Parse(tempRightHoldable.GetHoldableProp(Holdable.HoldablePropType.IsLeftHand).ToString());
                 if (isRightPrevious)
                 {
                     HoldItem(tempRightHoldable);
@@ -563,7 +632,8 @@ namespace HoldablePad.Behaviours
                 {
                     if (!InitalizedHoldablesDict.TryGetValue(item, out Holdable tempHoldable)) continue;
                     int pageIndex = InitalizedHoldables.IndexOf(tempHoldable);
-                    HoldableList[0].MenuPages[pageIndex].Object.GetComponentsInChildren<Button>(true).First(a => a.CurrentPage == Button.ButtonPage.Favourite).ButtonPressMethod(true);
+                    HoldableList[0].MenuPages[pageIndex].Object.GetComponentsInChildren<Button>(true)
+                        .First(a => a.CurrentPage == Button.ButtonPage.Favourite).ButtonPressMethod(true);
                     HoldableList[1].FilteredPages.Add(HoldableList[1].MenuPages[pageIndex]);
                 }
             }
@@ -571,12 +641,18 @@ namespace HoldablePad.Behaviours
             Initalized = true;
             MainResourceBundle.Unload(false);
 
-            HoldablePadHandheld.transform.Find("UI/BackPage/Flag").gameObject.SetActive(currentHoldableLength != InitalizedHoldables.Count);
-            HoldablePadHandheld.transform.Find("UI/BackPage/FlagText").GetComponent<Text>().text = currentHoldableLength == InitalizedHoldables.Count ? "" : Mathf.Abs(currentHoldableLength - InitalizedHoldables.Count).ToString();
+            HoldablePadHandheld.transform.Find("UI/BackPage/Flag").gameObject
+                .SetActive(currentHoldableLength != InitalizedHoldables.Count);
+            HoldablePadHandheld.transform.Find("UI/BackPage/FlagText").GetComponent<Text>().text =
+                currentHoldableLength == InitalizedHoldables.Count
+                    ? ""
+                    : Mathf.Abs(currentHoldableLength - InitalizedHoldables.Count).ToString();
 
             HP_Log.Write("");
-            HP_Log.Log("> " + Constants.Name + " (" + Constants.Version + ") was " + (currentHoldableLength == InitalizedHoldables.Count ? "fully loaded" : "loaded with issues"));
-            HP_Log.Log(" > Mod loaded in " + Mathf.RoundToInt((Time.unscaledTime - currentTime) / 0.01f) * 0.01f + " seconds");
+            HP_Log.Log("> " + Constants.Name + " (" + Constants.Version + ") was " +
+                       (currentHoldableLength == InitalizedHoldables.Count ? "fully loaded" : "loaded with issues"));
+            HP_Log.Log(" > Mod loaded in " + Mathf.RoundToInt((Time.unscaledTime - currentTime) / 0.01f) * 0.01f +
+                       " seconds");
             HP_Log.Log(" > " + InitalizedHoldables.Count + "/" + currentHoldableLength + " holdables were loaded");
             HP_Log.Write("");
         }
@@ -588,14 +664,20 @@ namespace HoldablePad.Behaviours
         {
             if (!Initalized) return;
 
-            bool thumbPressed = HP_Config.CurrentHand.Value == HP_Config.HandPosition.LeftHand ? ControllerInputPoller.instance.leftControllerPrimaryButton : ControllerInputPoller.instance.rightControllerPrimaryButton;
-            bool swapThumbPressed = HP_Config.CurrentHand.Value == HP_Config.HandPosition.RightHand ? ControllerInputPoller.instance.leftControllerPrimaryButton : ControllerInputPoller.instance.rightControllerPrimaryButton;
+            bool thumbPressed = HP_Config.CurrentHand.Value == HP_Config.HandPosition.LeftHand
+                ? ControllerInputPoller.instance.leftControllerPrimaryButton
+                : ControllerInputPoller.instance.rightControllerPrimaryButton;
+            bool swapThumbPressed = HP_Config.CurrentHand.Value == HP_Config.HandPosition.RightHand
+                ? ControllerInputPoller.instance.leftControllerPrimaryButton
+                : ControllerInputPoller.instance.rightControllerPrimaryButton;
 
             if (swapThumbPressed && Pad_CanOpen && HP_Config.SwapHands.Value)
             {
                 SetFavoruiteButtonSide(HP_Config.CurrentHand.Value != HP_Config.HandPosition.LeftHand);
                 SetPadHand(HP_Config.CurrentHand.Value != HP_Config.HandPosition.LeftHand);
-                HP_Config.OverwriteHand(HP_Config.CurrentHand.Value == HP_Config.HandPosition.LeftHand ? HP_Config.HandPosition.RightHand : HP_Config.HandPosition.LeftHand);
+                HP_Config.OverwriteHand(HP_Config.CurrentHand.Value == HP_Config.HandPosition.LeftHand
+                    ? HP_Config.HandPosition.RightHand
+                    : HP_Config.HandPosition.LeftHand);
 
                 Pad_ThumbPress = true;
                 if (!HoldablePadHandheld.activeSelf)
@@ -627,14 +709,18 @@ namespace HoldablePad.Behaviours
             {
                 if (dockedItem == null) continue;
                 Vector3 localPosition = new Vector3(0f, 57.3f, 0f);
-                dockedItem.localPosition = Vector3.Lerp(dockedItem.localPosition, localPosition, Constants.PageLerp * Time.unscaledDeltaTime);
-                dockedItem.localScale = Vector3.Lerp(dockedItem.localScale, Vector3.zero, Constants.PageLerp * Time.unscaledDeltaTime);
+                dockedItem.localPosition = Vector3.Lerp(dockedItem.localPosition, localPosition,
+                    Constants.PageLerp * Time.unscaledDeltaTime);
+                dockedItem.localScale = Vector3.Lerp(dockedItem.localScale, Vector3.zero,
+                    Constants.PageLerp * Time.unscaledDeltaTime);
             }
 
             if (ScrollFocus != null)
             {
-                ScrollFocus.localPosition = Vector3.Lerp(ScrollFocus.localPosition, Vector3.up * 17.1f, Constants.PageLerp * Time.unscaledDeltaTime);
-                ScrollFocus.localScale = Vector3.Lerp(ScrollFocus.localScale, Vector3.one, Constants.PageLerp * Time.unscaledDeltaTime);
+                ScrollFocus.localPosition = Vector3.Lerp(ScrollFocus.localPosition, Vector3.up * 17.1f,
+                    Constants.PageLerp * Time.unscaledDeltaTime);
+                ScrollFocus.localScale = Vector3.Lerp(ScrollFocus.localScale, Vector3.one,
+                    Constants.PageLerp * Time.unscaledDeltaTime);
             }
 
             foreach (var listItem in HoldableList)
@@ -650,24 +736,41 @@ namespace HoldablePad.Behaviours
                             bool isMyPage = i == listItem.CurrentIndex;
                             if (isMyPage)
                             {
-                                basePage.Object.localPosition = Vector3.Lerp(basePage.Object.localPosition, new Vector3(0f, listItem.HoldableHeight, 0f), Constants.PageLerp * Time.unscaledDeltaTime);
-                                basePage.Object.localScale = Vector3.Lerp(basePage.Object.localScale, listItem.HoldableSupported ? Vector3.one : Vector3.zero, Constants.PageLerp * Time.unscaledDeltaTime);
+                                basePage.Object.localPosition = Vector3.Lerp(basePage.Object.localPosition,
+                                    new Vector3(0f, listItem.HoldableHeight, 0f),
+                                    Constants.PageLerp * Time.unscaledDeltaTime);
+                                basePage.Object.localScale = Vector3.Lerp(basePage.Object.localScale,
+                                    listItem.HoldableSupported ? Vector3.one : Vector3.zero,
+                                    Constants.PageLerp * Time.unscaledDeltaTime);
                             }
                             else
                             {
-                                bool isNextPage = i == (listItem.CurrentIndex + 1) % listItem.FilteredPages.Count && listItem.FilteredPages.Count > 2;
-                                bool isPrevPage = i == (listItem.CurrentIndex == 0 ? listItem.FilteredPages.Count - 1 : listItem.CurrentIndex - 1) && listItem.FilteredPages.Count > 2;
-                                Vector3 localPosition = isPrevPage ? new Vector3(-43.5f, listItem.HoldableHeight, 0f) : isNextPage ? new Vector3(43.5f, listItem.HoldableHeight, 0f) : new Vector3(0f, listItem.HoldableHeight, 0f);
-                                basePage.Object.localPosition = Vector3.Lerp(basePage.Object.localPosition, localPosition, Constants.PageLerp * Time.unscaledDeltaTime);
-                                basePage.Object.localScale = Vector3.Lerp(basePage.Object.localScale, isNextPage || isPrevPage ? Vector3.zero : Vector3.zero, Constants.PageLerp * Time.unscaledDeltaTime);
+                                bool isNextPage = i == (listItem.CurrentIndex + 1) % listItem.FilteredPages.Count &&
+                                                  listItem.FilteredPages.Count > 2;
+                                bool isPrevPage =
+                                    i == (listItem.CurrentIndex == 0
+                                        ? listItem.FilteredPages.Count - 1
+                                        : listItem.CurrentIndex - 1) && listItem.FilteredPages.Count > 2;
+                                Vector3 localPosition = isPrevPage ? new Vector3(-43.5f, listItem.HoldableHeight, 0f) :
+                                    isNextPage ? new Vector3(43.5f, listItem.HoldableHeight, 0f) :
+                                    new Vector3(0f, listItem.HoldableHeight, 0f);
+                                basePage.Object.localPosition = Vector3.Lerp(basePage.Object.localPosition,
+                                    localPosition, Constants.PageLerp * Time.unscaledDeltaTime);
+                                basePage.Object.localScale = Vector3.Lerp(basePage.Object.localScale,
+                                    isNextPage || isPrevPage ? Vector3.zero : Vector3.zero,
+                                    Constants.PageLerp * Time.unscaledDeltaTime);
                             }
+
                             basePage.Object.gameObject.SetActive(basePage.Object.localScale.y > 0.03f);
                             continue;
                         }
+
                         basePage.Object.gameObject.SetActive(false);
                     }
+
                     continue;
                 }
+
                 for (int i = 0; i < listItem.MenuPages.Count; i++)
                 {
                     var menuP = listItem.MenuPages[i];
@@ -677,20 +780,36 @@ namespace HoldablePad.Behaviours
                         bool isMyPage = i == listItem.CurrentIndex;
                         if (isMyPage)
                         {
-                            basePage.Object.localPosition = Vector3.Lerp(basePage.Object.localPosition, new Vector3(0f, listItem.HoldableHeight, 0f), Constants.PageLerp * Time.unscaledDeltaTime);
-                            basePage.Object.localScale = Vector3.Lerp(basePage.Object.localScale, listItem.HoldableSupported ? Vector3.one : Vector3.zero, Constants.PageLerp * Time.unscaledDeltaTime);
+                            basePage.Object.localPosition = Vector3.Lerp(basePage.Object.localPosition,
+                                new Vector3(0f, listItem.HoldableHeight, 0f),
+                                Constants.PageLerp * Time.unscaledDeltaTime);
+                            basePage.Object.localScale = Vector3.Lerp(basePage.Object.localScale,
+                                listItem.HoldableSupported ? Vector3.one : Vector3.zero,
+                                Constants.PageLerp * Time.unscaledDeltaTime);
                         }
                         else
                         {
-                            bool isNextPage = i == (listItem.CurrentIndex + 1) % listItem.MenuPages.Count && listItem.MenuPages.Count > 2;
-                            bool isPrevPage = i == (listItem.CurrentIndex == 0 ? listItem.MenuPages.Count - 1 : listItem.CurrentIndex - 1) && listItem.MenuPages.Count > 2;
-                            Vector3 localPosition = isPrevPage ? new Vector3(-43.5f, listItem.HoldableHeight, 0f) : isNextPage ? new Vector3(43.5f, listItem.HoldableHeight, 0f) : new Vector3(0f, listItem.HoldableHeight, 0f);
-                            basePage.Object.localPosition = Vector3.Lerp(basePage.Object.localPosition, localPosition, Constants.PageLerp * Time.unscaledDeltaTime);
-                            basePage.Object.localScale = Vector3.Lerp(basePage.Object.localScale, isNextPage || isPrevPage ? Vector3.zero : Vector3.zero, Constants.PageLerp * Time.unscaledDeltaTime); // Just in case I decide to do something else with it I guess 7/1/2023 5:57 PM
+                            bool isNextPage = i == (listItem.CurrentIndex + 1) % listItem.MenuPages.Count &&
+                                              listItem.MenuPages.Count > 2;
+                            bool isPrevPage =
+                                i == (listItem.CurrentIndex == 0
+                                    ? listItem.MenuPages.Count - 1
+                                    : listItem.CurrentIndex - 1) && listItem.MenuPages.Count > 2;
+                            Vector3 localPosition = isPrevPage ? new Vector3(-43.5f, listItem.HoldableHeight, 0f) :
+                                isNextPage ? new Vector3(43.5f, listItem.HoldableHeight, 0f) :
+                                new Vector3(0f, listItem.HoldableHeight, 0f);
+                            basePage.Object.localPosition = Vector3.Lerp(basePage.Object.localPosition, localPosition,
+                                Constants.PageLerp * Time.unscaledDeltaTime);
+                            basePage.Object.localScale = Vector3.Lerp(basePage.Object.localScale,
+                                isNextPage || isPrevPage ? Vector3.zero : Vector3.zero,
+                                Constants.PageLerp *
+                                Time.unscaledDeltaTime); // Just in case I decide to do something else with it I guess 7/1/2023 5:57 PM
                         }
+
                         basePage.Object.gameObject.SetActive(basePage.Object.localScale.y > 0.03f);
                         continue;
                     }
+
                     basePage.Object.gameObject.SetActive(false);
                 }
             }
@@ -698,7 +817,8 @@ namespace HoldablePad.Behaviours
 
         public Task WriteHoldables(bool createDirectory)
         {
-            string holdablePath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Holdables");
+            string holdablePath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location),
+                "Holdables");
             if (createDirectory)
                 Directory.CreateDirectory(holdablePath);
 
@@ -715,6 +835,7 @@ namespace HoldablePad.Behaviours
                     var resourceBytes = resourceMemStr.ToArray();
                     File.WriteAllBytes(Path.Combine(holdablePath, resourceLocation), resourceBytes);
                 }
+
                 resourceMemStr.Close();
             });
             return Task.CompletedTask;
@@ -733,7 +854,8 @@ namespace HoldablePad.Behaviours
                 else if (!leftHandBool && CurrentHandheldR != null)
                     DropItem(CurrentHandheldR);
 
-                var removedHoldables = InitalizedHoldables.Where(a => a != holdable && a.GetHoldableProp(Holdable.HoldablePropType.IsLeftHand) == isLeftHand).ToList();
+                var removedHoldables = InitalizedHoldables.Where(a =>
+                    a != holdable && a.GetHoldableProp(Holdable.HoldablePropType.IsLeftHand) == isLeftHand).ToList();
                 removedHoldables.ForEach(a => a.InstantiatedObject.SetActive(false));
                 holdable.InstantiatedObject.SetActive(true);
 
@@ -742,9 +864,10 @@ namespace HoldablePad.Behaviours
                     CurrentHandheldL = holdable;
                     goto ApplyProperties;
                 }
+
                 CurrentHandheldR = holdable;
 
-            ApplyProperties:
+                ApplyProperties:
                 if (PhotonNetwork.InRoom)
                     ApplyProps();
             }
@@ -762,9 +885,10 @@ namespace HoldablePad.Behaviours
                     CurrentHandheldL = null;
                     goto ApplyProperties;
                 }
+
                 CurrentHandheldR = null;
 
-            ApplyProperties:
+                ApplyProperties:
                 if (PhotonNetwork.InRoom)
                     ApplyProps();
             }
@@ -773,10 +897,10 @@ namespace HoldablePad.Behaviours
         public void ApplyProps()
         {
             Hashtable customProps = new Hashtable()
-                {
-                    { "HP_Left", CurrentHandheldL == null ? "None" : CurrentHandheldL.BasePath },
-                    { "HP_Right", CurrentHandheldR == null ? "None" : CurrentHandheldR.BasePath },
-                };
+            {
+                { "HP_Left", CurrentHandheldL == null ? "None" : CurrentHandheldL.BasePath },
+                { "HP_Right", CurrentHandheldR == null ? "None" : CurrentHandheldR.BasePath },
+            };
             PhotonNetwork.LocalPlayer.SetCustomProperties(customProps);
         }
 
@@ -809,8 +933,11 @@ namespace HoldablePad.Behaviours
 
         public void SetFavoruiteButtonSide(bool isLeftHand)
         {
-            var favouriteButton = HoldablePadHandheld.GetComponentsInChildren<Button>(true).Where(a => a.CurrentPage == Button.ButtonPage.Favourite);
-            favouriteButton.ToList().ForEach(a => a.transform.localPosition = isLeftHand ? new Vector3(39.8f, 41.84f, 3.5f) : new Vector3(-39.8f, 41.84f, 3.5f));
+            var favouriteButton = HoldablePadHandheld.GetComponentsInChildren<Button>(true)
+                .Where(a => a.CurrentPage == Button.ButtonPage.Favourite);
+            favouriteButton.ToList().ForEach(a =>
+                a.transform.localPosition =
+                    isLeftHand ? new Vector3(39.8f, 41.84f, 3.5f) : new Vector3(-39.8f, 41.84f, 3.5f));
         }
 
         /// <summary>
@@ -835,6 +962,7 @@ namespace HoldablePad.Behaviours
                     currentMaterial.mainTextureOffset = texOffset;
                     continue;
                 }
+
                 padColours.Add(currentMaterial);
                 currentMaterial.mainTextureOffset = texOffset;
             }
@@ -846,6 +974,7 @@ namespace HoldablePad.Behaviours
                     padRenderer.gameObject.GetOrAddComponent<CustomColour>().ColourCheckMaterial = padColours;
                     return;
                 }
+
                 Destroy(padRenderer.gameObject.GetOrAddComponent<CustomColour>());
                 // I mean I guess it gets the job done (7/1/2023 6:33 PM)
             }
@@ -897,7 +1026,8 @@ namespace HoldablePad.Behaviours
         /// <param name="setScreenMode">The page the pad will be set to</param>
         public void SetPage(ScreenModes setScreenMode) // Polished, 5:14 AM, 7/4/2023
         {
-            if (setScreenMode == CurrentScreenMode || setScreenMode == ScreenModes.HoldableView || setScreenMode == ScreenModes.InfoView && CurrentScreenMode == ScreenModes.InitalInfo)
+            if (setScreenMode == CurrentScreenMode || setScreenMode == ScreenModes.HoldableView ||
+                setScreenMode == ScreenModes.InfoView && CurrentScreenMode == ScreenModes.InitalInfo)
             {
                 Static.GlobalBtnCooldownTime = Time.unscaledTime;
                 HoldableList.ForEach(a => a.ForceDocked = false);
@@ -914,10 +1044,15 @@ namespace HoldablePad.Behaviours
 
                 var currentList = HoldableList[CurrentHoldableListItem];
                 var currentItem = currentList.MenuPages[currentList.CurrentIndex];
-                currentItem = currentList.IsFiltered ? currentList.FilteredPages.Count == 0 ? currentItem : currentList.FilteredPages[currentList.CurrentIndex] : currentItem;
+                currentItem = currentList.IsFiltered
+                    ? currentList.FilteredPages.Count == 0
+                        ? currentItem
+                        : currentList.FilteredPages[currentList.CurrentIndex]
+                    : currentItem;
                 var holdable = InitalizedHoldables[currentList.MenuPages.IndexOf(currentItem)];
                 bool isLeft = bool.Parse(holdable.GetHoldableProp(Holdable.HoldablePropType.IsLeftHand).ToString());
-                HoldablePadHandheld.transform.Find("UI/ButtonTextMiddle").GetComponent<Text>().text = HoldableUtils.IsEquipped(holdable) ? "Unequip" : $"Equip ({(isLeft ? "Left" : "Right")})";
+                HoldablePadHandheld.transform.Find("UI/ButtonTextMiddle").GetComponent<Text>().text =
+                    HoldableUtils.IsEquipped(holdable) ? "Unequip" : $"Equip ({(isLeft ? "Left" : "Right")})";
 
                 CurrentScreenMode = ScreenModes.HoldableView;
                 return;
@@ -928,17 +1063,19 @@ namespace HoldablePad.Behaviours
                 case ScreenModes.ConfigView:
                     HoldableList.ForEach(a => a.ForceDocked = true);
 
-                    if (CurrentScreenMode == ScreenModes.InfoView || CurrentScreenMode == ScreenModes.FavouriteView || CurrentScreenMode == ScreenModes.InitalInfo)
+                    if (CurrentScreenMode == ScreenModes.InfoView || CurrentScreenMode == ScreenModes.FavouriteView ||
+                        CurrentScreenMode == ScreenModes.InitalInfo)
                         ResetDocks();
 
                     SetDock(NoHoldablesPage.Object, 0);
-                    RemoveDock(1);
-                    SetDock(MMObject, 2);
+                    SetDock(ConfigPage.Object, 1); // Dock config page properly
+                    RemoveDock(2);
                     ScrollFocus = ConfigPage.Object;
 
                     ConfigPage.Object.gameObject.SetActive(true);
                     HoldablePadHandheld.transform.Find("UI/ButtonTextMiddle").GetComponent<Text>().text = "Apply";
                     break;
+
                 case ScreenModes.InfoView: // same as InitalInfo
                     HoldableList.ForEach(a => a.ForceDocked = true);
 
@@ -969,8 +1106,10 @@ namespace HoldablePad.Behaviours
                     break;
                 case ScreenModes.FavouriteView:
                     if (HoldableList[1].FilteredPages.Count > 0)
-                        HoldableList[1].CurrentIndex = HoldableList[1].CurrentIndex % HoldableList[1].FilteredPages.Count;
-                    if (CurrentScreenMode == ScreenModes.InfoView || CurrentScreenMode == ScreenModes.ConfigView || CurrentScreenMode == ScreenModes.InitalInfo)
+                        HoldableList[1].CurrentIndex =
+                            HoldableList[1].CurrentIndex % HoldableList[1].FilteredPages.Count;
+                    if (CurrentScreenMode == ScreenModes.InfoView || CurrentScreenMode == ScreenModes.ConfigView ||
+                        CurrentScreenMode == ScreenModes.InitalInfo)
                         ResetDocks();
 
                     RemoveDock(0);
@@ -979,7 +1118,9 @@ namespace HoldablePad.Behaviours
                     ScrollFocus = HoldableList[1].FilteredPages.Count == 0 ? NoHoldablesPage.Object : null;
 
                     var holdableTransform = HoldablePadHandheld.transform;
-                    Transform targetDocked = CurrentScreenMode == ScreenModes.ConfigView ? ConfigPage.Object : holdableTransform.Find("UI/MainMenuPage");
+                    Transform targetDocked = CurrentScreenMode == ScreenModes.ConfigView
+                        ? ConfigPage.Object
+                        : holdableTransform.Find("UI/MainMenuPage");
 
                     CurrentHoldableListItem = 1;
                     HoldableList[0].HoldablesDocked = true;
@@ -988,18 +1129,25 @@ namespace HoldablePad.Behaviours
 
                     var currentList = HoldableList[CurrentHoldableListItem];
                     var currentItem = currentList.MenuPages[currentList.CurrentIndex];
-                    currentItem = currentList.IsFiltered ? currentList.FilteredPages.Count == 0 ? currentItem : currentList.FilteredPages[currentList.CurrentIndex] : currentItem;
+                    currentItem = currentList.IsFiltered
+                        ? currentList.FilteredPages.Count == 0
+                            ? currentItem
+                            : currentList.FilteredPages[currentList.CurrentIndex]
+                        : currentItem;
 
                     var holdable = InitalizedHoldables[currentList.MenuPages.IndexOf(currentItem)];
                     bool isLeft = bool.Parse(holdable.GetHoldableProp(Holdable.HoldablePropType.IsLeftHand).ToString());
 
                     NoHoldablesPage.Object.gameObject.SetActive(true);
-                    HoldablePadHandheld.transform.Find("UI/ButtonTextMiddle").GetComponent<Text>().text = HoldableList[1].FilteredPages.Count == 0 ? "Proceed" : HoldableUtils.IsEquipped(holdable) ? "Unequip" : $"Equip ({(isLeft ? "Left" : "Right")})";
+                    HoldablePadHandheld.transform.Find("UI/ButtonTextMiddle").GetComponent<Text>().text =
+                        HoldableList[1].FilteredPages.Count == 0 ? "Proceed" :
+                        HoldableUtils.IsEquipped(holdable) ? "Unequip" : $"Equip ({(isLeft ? "Left" : "Right")})";
                     break;
             }
 
             CurrentScreenMode = setScreenMode;
         }
+
         #endregion
 
         #region Menu Buttons
@@ -1012,11 +1160,11 @@ namespace HoldablePad.Behaviours
         {
             switch (objectName)
             {
-                /*case "Cube (3)":
+                case "Cube (3)":
                     SetPage(ScreenModes.ConfigView);
                     PadSource.PlayOneShot(Open, Constants.ButtonVolume);
                     Static.GlobalBtnCooldownTime = Time.unscaledTime;
-                    return;*/
+                    return;
                 case "Cube (4)":
                     SetPage(ScreenModes.InfoView);
                     PadSource.PlayOneShot(Open, Constants.ButtonVolume);
@@ -1029,7 +1177,8 @@ namespace HoldablePad.Behaviours
                     return;
             }
 
-            if (CurrentScreenMode == ScreenModes.InitalInfo || CurrentScreenMode == ScreenModes.InfoView || (CurrentScreenMode == ScreenModes.FavouriteView && HoldableList[1].FilteredPages.Count == 0))
+            if (CurrentScreenMode == ScreenModes.InitalInfo || CurrentScreenMode == ScreenModes.InfoView ||
+                (CurrentScreenMode == ScreenModes.FavouriteView && HoldableList[1].FilteredPages.Count == 0))
             {
                 SetPage(ScreenModes.HoldableView);
                 PadSource.PlayOneShot(Equip, Constants.ButtonVolume);
@@ -1037,29 +1186,38 @@ namespace HoldablePad.Behaviours
             }
             else if (CurrentScreenMode == ScreenModes.ConfigView)
             {
-                if (objectName == "Cube (1)" || objectName == "Cube (2)")
+                if (objectName == "Cube (3)")
                 {
                     PadSource.PlayOneShot(Swap, Constants.ButtonVolume);
                     Static.GlobalBtnCooldownTime = Time.unscaledTime;
-                    ConfigPage.SaveConfig(); // Ensure settings are saved
-                    SetPage(ScreenModes.HoldableView); // Return to the holdable view after config
+                    ConfigPage.SaveConfig();
+                    SetPage(ScreenModes.HoldableView);
                     return;
                 }
             }
+
             else if (CurrentScreenMode == ScreenModes.HoldableView || CurrentScreenMode == ScreenModes.FavouriteView)
             {
                 switch (objectName)
                 {
                     case "Cube (1)":
                         PadSource.PlayOneShot(Swap, Constants.ButtonVolume);
-                        var usedList = HoldableList[CurrentHoldableListItem].IsFiltered ? HoldableList[CurrentHoldableListItem].FilteredPages : HoldableList[CurrentHoldableListItem].MenuPages;
-                        HoldableList[CurrentHoldableListItem].CurrentIndex = HoldableList[CurrentHoldableListItem].CurrentIndex == 0 ? usedList.Count - 1 : HoldableList[CurrentHoldableListItem].CurrentIndex - 1;
+                        var usedList = HoldableList[CurrentHoldableListItem].IsFiltered
+                            ? HoldableList[CurrentHoldableListItem].FilteredPages
+                            : HoldableList[CurrentHoldableListItem].MenuPages;
+                        HoldableList[CurrentHoldableListItem].CurrentIndex =
+                            HoldableList[CurrentHoldableListItem].CurrentIndex == 0
+                                ? usedList.Count - 1
+                                : HoldableList[CurrentHoldableListItem].CurrentIndex - 1;
                         UpdateHoldableUI();
                         break;
                     case "Cube (2)":
                         PadSource.PlayOneShot(Swap, Constants.ButtonVolume);
-                        var usedList2 = HoldableList[CurrentHoldableListItem].IsFiltered ? HoldableList[CurrentHoldableListItem].FilteredPages : HoldableList[CurrentHoldableListItem].MenuPages;
-                        HoldableList[CurrentHoldableListItem].CurrentIndex = (HoldableList[CurrentHoldableListItem].CurrentIndex + 1) % usedList2.Count;
+                        var usedList2 = HoldableList[CurrentHoldableListItem].IsFiltered
+                            ? HoldableList[CurrentHoldableListItem].FilteredPages
+                            : HoldableList[CurrentHoldableListItem].MenuPages;
+                        HoldableList[CurrentHoldableListItem].CurrentIndex =
+                            (HoldableList[CurrentHoldableListItem].CurrentIndex + 1) % usedList2.Count;
                         UpdateHoldableUI();
                         break;
                     default:
@@ -1073,22 +1231,29 @@ namespace HoldablePad.Behaviours
         {
             var currentList = HoldableList[CurrentHoldableListItem];
             var currentItem = currentList.MenuPages[currentList.CurrentIndex];
-            currentItem = currentList.IsFiltered && currentList.FilteredPages.Count > 0 ? currentList.FilteredPages[currentList.CurrentIndex] : currentItem;
+            currentItem = currentList.IsFiltered && currentList.FilteredPages.Count > 0
+                ? currentList.FilteredPages[currentList.CurrentIndex]
+                : currentItem;
             var holdable = InitalizedHoldables[currentList.MenuPages.IndexOf(currentItem)];
             bool isLeft = bool.Parse(holdable.GetHoldableProp(Holdable.HoldablePropType.IsLeftHand).ToString());
-            HoldablePadHandheld.transform.Find("UI/ButtonTextMiddle").GetComponent<Text>().text = HoldableUtils.IsEquipped(holdable) ? "Unequip" : $"Equip ({(isLeft ? "Left" : "Right")})";
+            HoldablePadHandheld.transform.Find("UI/ButtonTextMiddle").GetComponent<Text>().text =
+                HoldableUtils.IsEquipped(holdable) ? "Unequip" : $"Equip ({(isLeft ? "Left" : "Right")})";
         }
 
         private void EquipOrUnequipCurrentItem()
         {
             var currentList = HoldableList[CurrentHoldableListItem];
             var currentItem = currentList.MenuPages[currentList.CurrentIndex];
-            currentItem = currentList.IsFiltered && currentList.FilteredPages.Count > 0 ? currentList.FilteredPages[currentList.CurrentIndex] : currentItem;
+            currentItem = currentList.IsFiltered && currentList.FilteredPages.Count > 0
+                ? currentList.FilteredPages[currentList.CurrentIndex]
+                : currentItem;
             var holdable = InitalizedHoldables[currentList.MenuPages.IndexOf(currentItem)];
             PadSource.PlayOneShot(Equip, Constants.ButtonVolume);
 
             string equipName = HoldableUtils.IsEquipped(holdable) ? "DropItem" : "HoldItem";
-            GetType().GetMethod(equipName, BindingFlags.Public | BindingFlags.Static | BindingFlags.Instance | BindingFlags.InvokeMethod).Invoke(this, new object[] { holdable });
+            GetType().GetMethod(equipName,
+                    BindingFlags.Public | BindingFlags.Static | BindingFlags.Instance | BindingFlags.InvokeMethod)
+                .Invoke(this, new object[] { holdable });
             HP_Config.CurrentHoldableLeft.Value = CurrentHandheldL == null ? "None" : CurrentHandheldL.BasePath;
             HP_Config.CurrentHoldableRight.Value = CurrentHandheldR == null ? "None" : CurrentHandheldR.BasePath;
             HP_Config.ConfigFile.Save();
@@ -1135,6 +1300,7 @@ namespace HoldablePad.Behaviours
                     HP_Log.LogError("Error while attempting to save favourited holdables: " + ex.ToString());
                 }
             }
+
             HP_Config.ConfigFile.Save();
         }
 
@@ -1153,19 +1319,27 @@ namespace HoldablePad.Behaviours
             if (HoldablePadHandheld.activeSelf)
             {
                 PadSource.PlayOneShot(Open, 0.2f);
-                GorillaTagger.Instance.StartVibration(HP_Config.CurrentHand.Value == HP_Config.HandPosition.LeftHand, 0.1f, 0.07f);
+                GorillaTagger.Instance.StartVibration(HP_Config.CurrentHand.Value == HP_Config.HandPosition.LeftHand,
+                    0.1f, 0.07f);
             }
 
-            if (HoldableList[CurrentHoldableListItem].CurrentIndex < InitalizedHoldables.Count && CurrentScreenMode == ScreenModes.HoldableView)
+            if (HoldableList[CurrentHoldableListItem].CurrentIndex < InitalizedHoldables.Count &&
+                CurrentScreenMode == ScreenModes.HoldableView)
             {
                 var currentList = HoldableList[CurrentHoldableListItem];
                 var currentItem = currentList.MenuPages[currentList.CurrentIndex];
-                currentItem = currentList.IsFiltered ? currentList.FilteredPages.Count == 0 ? currentItem : currentList.FilteredPages[currentList.CurrentIndex] : currentItem;
+                currentItem = currentList.IsFiltered
+                    ? currentList.FilteredPages.Count == 0
+                        ? currentItem
+                        : currentList.FilteredPages[currentList.CurrentIndex]
+                    : currentItem;
 
                 var holdable = InitalizedHoldables[currentList.MenuPages.IndexOf(currentItem)];
                 bool isLeft = bool.Parse(holdable.GetHoldableProp(Holdable.HoldablePropType.IsLeftHand).ToString());
-                HoldablePadHandheld.transform.Find("UI/ButtonTextMiddle").GetComponent<Text>().text = HoldableUtils.IsEquipped(holdable) ? "Unequip" : $"Equip ({(isLeft ? "Left" : "Right")})";
+                HoldablePadHandheld.transform.Find("UI/ButtonTextMiddle").GetComponent<Text>().text =
+                    HoldableUtils.IsEquipped(holdable) ? "Unequip" : $"Equip ({(isLeft ? "Left" : "Right")})";
             }
+
             if (CurrentScreenMode == ScreenModes.InitalInfo || CurrentScreenMode == ScreenModes.InfoView)
                 HoldablePadHandheld.transform.Find("UI/ButtonTextMiddle").GetComponent<Text>().text = "Proceed";
 
@@ -1182,20 +1356,25 @@ namespace HoldablePad.Behaviours
             HoldablePadHandheld.SetActive(true);
 
             PadSource.PlayOneShot(Open, 0.2f);
-            GorillaTagger.Instance.StartVibration(HP_Config.CurrentHand.Value == HP_Config.HandPosition.LeftHand, 0.1f, 0.07f);
+            GorillaTagger.Instance.StartVibration(HP_Config.CurrentHand.Value == HP_Config.HandPosition.LeftHand, 0.1f,
+                0.07f);
 
-            if (HoldableList[CurrentHoldableListItem].CurrentIndex < InitalizedHoldables.Count && CurrentScreenMode == ScreenModes.HoldableView)
+            if (HoldableList[CurrentHoldableListItem].CurrentIndex < InitalizedHoldables.Count &&
+                CurrentScreenMode == ScreenModes.HoldableView)
             {
                 var holdable = InitalizedHoldables[HoldableList[CurrentHoldableListItem].CurrentIndex];
                 bool isLeft = bool.Parse(holdable.GetHoldableProp(Holdable.HoldablePropType.IsLeftHand).ToString());
-                HoldablePadHandheld.transform.Find("UI/ButtonTextMiddle").GetComponent<Text>().text = HoldableUtils.IsEquipped(holdable) ? "Unequip" : $"Equip ({(isLeft ? "Left" : "Right")})";
+                HoldablePadHandheld.transform.Find("UI/ButtonTextMiddle").GetComponent<Text>().text =
+                    HoldableUtils.IsEquipped(holdable) ? "Unequip" : $"Equip ({(isLeft ? "Left" : "Right")})";
             }
+
             if (CurrentScreenMode == ScreenModes.InitalInfo || CurrentScreenMode == ScreenModes.InfoView)
                 HoldablePadHandheld.transform.Find("UI/ButtonTextMiddle").GetComponent<Text>().text = "Proceed";
 
             await Task.Delay(Constants.PageDisplay);
             Pad_CanOpen = true;
         }
+
         #endregion
     }
 }

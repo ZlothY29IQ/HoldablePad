@@ -19,7 +19,7 @@ namespace HoldablePad.Behaviours.Holdables
             ProjectileRigidbody = gameObject.AddComponent<Rigidbody>();
             ProjectileRigidbody.mass = 10;
             ProjectileRigidbody.constraints = RigidbodyConstraints.FreezeRotation;
-            ProjectileRigidbody.velocity = targetVelocity;
+            ProjectileRigidbody.linearVelocity = targetVelocity;
         }
 
         public void OnCollisionEnter(Collision collision)
